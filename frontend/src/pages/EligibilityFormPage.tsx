@@ -25,11 +25,17 @@ const eligibilitySchema = z.object({
     const age = new Date().getFullYear() - d.getFullYear();
     return age >= 18 && age <= 100;
   }, "Age must be between 18 and 100"),
-  income: z.preprocess((val) => Number(String(val).replace(/,/g, '')), z.number({ invalid_type_error: "Must be a valid number" }).min(0, "Income must be at least 0").max(10000000, "Income cannot exceed 1,00,00,000")),
+  income: z.preprocess((val) => {
+    if (typeof val === 'number') return val;
+    return Number(String(val).replace(/,/g, '')) || 0;
+  }, z.number().min(0, "Income must be at least 0").max(10000000, "Income cannot exceed 1,0,0,00,000")),
   state: z.string().min(1, "State is required"),
   occupation: z.string().min(1, "Occupation is required"),
   category: z.string().min(1, "Category is required"),
-  land_size: z.preprocess((val) => val === '' ? 0 : Number(val), z.number().min(0, "Must be >= 0").default(0)),
+  land_size: z.preprocess((val) => {
+    if (typeof val === 'number') return val;
+    return val === '' ? 0 : Number(val) || 0;
+  }, z.number().min(0, "Must be >= 0")),
 })
 
 type EligibilityFormValues = z.infer<typeof eligibilitySchema>
@@ -41,11 +47,11 @@ export default function EligibilityFormPage() {
   const [autoFilled, setAutoFilled] = useState(false)
 
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<EligibilityFormValues>({
-    resolver: zodResolver(eligibilitySchema),
+    resolver: zodResolver(eligibilitySchema) as any,
     defaultValues: {
       name: '',
       dob: '',
-      income: undefined,
+      income: 0,
       state: '',
       occupation: '',
       category: '',

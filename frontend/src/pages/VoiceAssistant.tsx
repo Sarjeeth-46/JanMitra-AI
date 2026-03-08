@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Mic, Square, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import API_BASE_URL, { apiEndpoints } from '../config/api'
+import { apiEndpoints } from '../config/api'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 interface Message {

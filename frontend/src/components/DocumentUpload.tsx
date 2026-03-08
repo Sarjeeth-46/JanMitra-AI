@@ -26,7 +26,7 @@ const DocumentUpload = ({ onDataExtracted }: DocumentUploadProps) => {
       toast.loading('Analyzing document securely...', { id: 'ocr' })
 
       // Upload to backend which now uses AWS Textract
-      const response = await uploadDocument(file)
+      const response = await uploadDocument(file, 'document')
 
       console.log("AWS Textract Extracted Fields:", response.extracted_fields)
 

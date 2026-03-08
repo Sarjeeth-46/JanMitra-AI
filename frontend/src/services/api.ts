@@ -105,6 +105,7 @@ export interface DocumentExtraction {
   status: string
   document_type: string
   data: any
+  extracted_fields?: any
 }
 
 export interface VoiceQueryResponse {
