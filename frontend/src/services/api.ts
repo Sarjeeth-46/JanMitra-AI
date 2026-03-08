@@ -24,6 +24,7 @@ const publicAxios = axios.create({
   baseURL: API_BASE,
   timeout: 30_000,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: false,
 })
 
 // ─── Axios instance ───────────────────────────────────────────────────────────
@@ -31,6 +32,7 @@ const api: AxiosInstance = axios.create({
   baseURL: API_BASE,
   timeout: 30_000,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: false,
 })
 
 // ─── Token management ─────────────────────────────────────────────────────────
