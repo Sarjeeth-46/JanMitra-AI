@@ -190,7 +190,7 @@ export interface SystemHealth {
 export async function evaluateEligibility(
   profile: EvaluationRequest
 ): Promise<EvaluationResult[]> {
-  const res = await api.post<EvaluationResult[]>('/api/evaluate', profile)
+  const res = await api.post<EvaluationResult[]>('/evaluate', profile)
   return res.data
 }
 
@@ -204,7 +204,7 @@ export interface DocumentStatus {
  * Get the current document verification status for the user.
  */
 export async function getDocumentStatus(): Promise<DocumentStatus> {
-  const res = await api.get<DocumentStatus>('/api/documents/status')
+  const res = await api.get<DocumentStatus>('/documents/status')
   return res.data
 }
 
@@ -216,7 +216,7 @@ export async function uploadDocument(file: File, type: string): Promise<Document
   formData.append('document_type', type)
   formData.append('file', file)
 
-  const res = await api.post<DocumentExtraction>('/api/upload-document', formData, {
+  const res = await api.post<DocumentExtraction>('/upload-document', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
   return res.data
@@ -229,7 +229,7 @@ export async function uploadDocument(file: File, type: string): Promise<Document
 export async function voiceQuery(audioBlob: Blob, filename = 'voice.webm', lang = 'auto'): Promise<VoiceQueryResponse> {
   const form = new FormData()
   form.append('audio', audioBlob, filename)
-  const res = await api.post<VoiceQueryResponse>(`/api/voice/query?lang=${lang}`, form, {
+  const res = await api.post<VoiceQueryResponse>(`/voice/query?lang=${lang}`, form, {
     headers: {
       'Content-Type': 'multipart/form-data',
       'X-Session-Id': SESSION_ID,        // enables server-side session locking
@@ -244,7 +244,7 @@ export async function voiceQuery(audioBlob: Blob, filename = 'voice.webm', lang 
  * Check the status of all AWS services.
  */
 export async function getSystemHealth(): Promise<SystemHealth> {
-  const res = await api.get<SystemHealth>('/api/system-health')
+  const res = await api.get<SystemHealth>('/system-health')
   return res.data
 }
 
@@ -253,7 +253,7 @@ export async function getSystemHealth(): Promise<SystemHealth> {
  * Simple liveness check.
  */
 export async function ping(): Promise<{ status: string; timestamp: string }> {
-  const res = await api.get('/api/health')
+  const res = await api.get('/health')
   return res.data
 }
 
@@ -262,7 +262,7 @@ export async function ping(): Promise<{ status: string; timestamp: string }> {
  * Submit user feedback.
  */
 export async function submitFeedback(data: FeedbackRequest): Promise<{ message: string }> {
-  const res = await api.post<{ message: string }>('/api/feedback', data)
+  const res = await api.post<{ message: string }>('/feedback', data)
   return res.data
 }
 
@@ -270,7 +270,7 @@ export async function submitFeedback(data: FeedbackRequest): Promise<{ message: 
  * POST /api/auth/send-otp
  */
 export async function sendOTP(mobile: string): Promise<{ success: boolean; message: string }> {
-  const res = await publicAxios.post('/api/auth/send-otp', { mobile })
+  const res = await publicAxios.post('/auth/send-otp', { mobile })
   return res.data
 }
 
@@ -278,7 +278,7 @@ export async function sendOTP(mobile: string): Promise<{ success: boolean; messa
  * POST /api/auth/verify-otp
  */
 export async function verifyOTP(mobile: string, otp: string, name?: string): Promise<AuthResponse> {
-  const res = await publicAxios.post<AuthResponse>('/api/auth/verify-otp', { mobile, otp, name })
+  const res = await publicAxios.post<AuthResponse>('/auth/verify-otp', { mobile, otp, name })
   return res.data
 }
 
@@ -286,7 +286,7 @@ export async function verifyOTP(mobile: string, otp: string, name?: string): Pro
  * POST /api/auth/login
  */
 export async function login(email: string, password: string): Promise<AuthResponse> {
-  const res = await publicAxios.post<AuthResponse>('/api/auth/login', { email, password })
+  const res = await publicAxios.post<AuthResponse>('/auth/login', { email, password })
   return res.data
 }
 
@@ -296,7 +296,7 @@ export async function login(email: string, password: string): Promise<AuthRespon
  * Uses plain axios (no auth interceptor) – register is a public endpoint.
  */
 export async function register(data: RegisterRequest): Promise<{ message: string }> {
-  const res = await publicAxios.post<{ message: string }>('/api/auth/register', data)
+  const res = await publicAxios.post<{ message: string }>('/auth/register', data)
   return res.data
 }
 
@@ -305,7 +305,7 @@ export async function register(data: RegisterRequest): Promise<{ message: string
  * Track application status by ID and phone.
  */
 export async function getApplicationStatus(id: string, phone: string): Promise<ApplicationStatus> {
-  const res = await api.get<ApplicationStatus>(`/api/application-status?id=${encodeURIComponent(id)}&phone=${encodeURIComponent(phone)}`)
+  const res = await api.get<ApplicationStatus>(`/application-status?id=${encodeURIComponent(id)}&phone=${encodeURIComponent(phone)}`)
   return res.data
 }
 
@@ -314,7 +314,7 @@ export async function getApplicationStatus(id: string, phone: string): Promise<A
  * Get current user profile.
  */
 export async function getProfile(): Promise<AuthUser> {
-  const res = await api.get<AuthUser>('/api/user/profile')
+  const res = await api.get<AuthUser>('/user/profile')
   return res.data
 }
 
@@ -323,7 +323,7 @@ export async function getProfile(): Promise<AuthUser> {
  * Get list of applications for current user.
  */
 export async function getUserApplications(): Promise<UserApplication[]> {
-  const res = await api.get<UserApplication[]>('/api/user/applications')
+  const res = await api.get<UserApplication[]>('/user/applications')
   return res.data
 }
 
@@ -336,7 +336,7 @@ export async function submitApplication(data: {
   scheme_name: string
   user_profile: any
 }): Promise<ApplicationStatus> {
-  const res = await api.post<ApplicationStatus>('/api/submit-application', data)
+  const res = await api.post<ApplicationStatus>('/submit-application', data)
   return res.data
 }
 
@@ -345,7 +345,7 @@ export async function submitApplication(data: {
  * Returns the list of FAQs.
  */
 export async function getFAQs(): Promise<{ faqs: Array<{ id: number; question: string; answer: string }>; total: number }> {
-  const res = await api.get('/api/faqs')
+  const res = await api.get('/faqs')
   return res.data
 }
 
@@ -357,7 +357,7 @@ export async function getServices(): Promise<{
   services: Array<{ id: string; title: string; description: string; icon: string; link: string; badge: string }>
   total: number
 }> {
-  const res = await api.get('/api/services')
+  const res = await api.get('/services')
   return res.data
 }
 
