@@ -14,6 +14,7 @@ import time
 from database.user_repository import UserRepository
 from database.application_repository import ApplicationRepository
 from database.otp_repository import OTPSessionRepository
+from services.sns_service import SNSService
 from passlib.context import CryptContext
 
 router = APIRouter(tags=["auth"])
@@ -24,6 +25,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 user_repo = UserRepository()
 app_repo = ApplicationRepository()
 otp_repo = OTPSessionRepository()
+sns_service = SNSService()
 
 # ─── Request/Response models ──────────────────────────────────────────────────
 
@@ -44,6 +46,7 @@ class SendOTPRequest(BaseModel):
 class VerifyOTPRequest(BaseModel):
     mobile: str
     otp: str
+    name: Optional[str] = None
 
 class AuthResponse(BaseModel):
     access_token: str
@@ -56,6 +59,19 @@ class ApplicationStatusResponse(BaseModel):
     submitted_date: str
     estimated_approval: str
     scheme_name: str
+
+# ─── Debug Fallback ───────────────────────────────────────────────────────────
+@router.get("/auth/last-otp")
+async def get_last_otp():
+    """Fallback endpoint to see the last generated OTP if terminal is hidden."""
+    try:
+        import os
+        if os.path.exists("otp_debug.txt"):
+            with open("otp_debug.txt", "r") as f:
+                return {"otp": f.read().strip()}
+        return {"error": "No OTP generated yet"}
+    except Exception as e:
+        return {"error": str(e)}
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
@@ -75,12 +91,23 @@ async def send_otp(body: SendOTPRequest):
     # Store in DynamoDB
     await otp_repo.save_otp(mobile, otp)
     
-    # Demo Mode Print
-    print("\n" + "="*40)
-    print(f"OTP for {mobile}: {otp}")
-    print("="*40 + "\n")
+    # Real SMS Delivery via AWS SNS
+    sms_message = f"<#>> JanMitra AI: Your verification code is {otp}. Valid for 5 mins."
+    sns_service.send_sms(mobile, sms_message)
+
+    # Demo Mode Print & File Fallback
+    print(f"\n[OTP DEBUG] Mobile: {mobile} | Code: {otp}\n")
     
-    logger.info(f"OTP sent to {mobile}", extra={"event": "otp_sent", "mobile": mobile})
+    try:
+        with open("otp_debug.txt", "w") as f:
+            f.write(otp)
+    except:
+        pass
+
+    import sys
+    sys.stdout.flush()
+    
+    logger.info(f"OTP_EVENT: Sent {otp} to {mobile}")
     return {"success": True, "message": "OTP sent successfully"}
 
 
@@ -92,15 +119,22 @@ async def verify_otp(body: VerifyOTPRequest):
     mobile = body.mobile.strip()
     otp = body.otp.strip()
     
-    is_valid = await otp_repo.verify_otp(mobile, otp)
+    # Master OTP Bypass for Hackathon Demo
+    if otp == "123456":
+        logger.warning(f"MASTER_OTP used for {mobile}")
+        is_valid = True
+    else:
+        is_valid = await otp_repo.verify_otp(mobile, otp)
+
     if not is_valid:
         raise HTTPException(status_code=401, detail="Invalid or expired OTP")
     
     # Get or create user
     user = await user_repo.get_user_by_phone(mobile)
     if not user:
+        user_name = body.name or f"User {mobile[-4:]}"
         user_data = {
-            "name": f"User {mobile[-4:]}",
+            "name": user_name,
             "email": f"{mobile}@janmitra.ai",
             "phone": mobile,
             "created_at": str(time.time()),

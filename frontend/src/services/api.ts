@@ -10,7 +10,8 @@
 import axios, { type AxiosInstance } from 'axios'
 
 // ─── Base URL ────────────────────────────────────────────────────────────────
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+console.log('DEBUG: API_BASE initialized as:', API_BASE || '(relative)')
 
 // Stable session ID for the lifetime of this browser tab (voice concurrency control)
 export const SESSION_ID = crypto.randomUUID()
@@ -140,6 +141,7 @@ export interface AuthResponse {
 export interface OTPVerifyRequest {
   mobile: string
   otp: string
+  name?: string
 }
 
 export interface OTPVerifyResponse {
@@ -269,8 +271,8 @@ export async function sendOTP(mobile: string): Promise<{ success: boolean; messa
 /**
  * POST /api/auth/verify-otp
  */
-export async function verifyOTP(mobile: string, otp: string): Promise<AuthResponse> {
-  const res = await publicAxios.post<AuthResponse>('/api/auth/verify-otp', { mobile, otp })
+export async function verifyOTP(mobile: string, otp: string, name?: string): Promise<AuthResponse> {
+  const res = await publicAxios.post<AuthResponse>('/api/auth/verify-otp', { mobile, otp, name })
   return res.data
 }
 

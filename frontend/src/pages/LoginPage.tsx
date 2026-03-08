@@ -21,10 +21,13 @@ export default function LoginPage() {
         setLoading(true)
         setError('')
         try {
-            await sendOTP(cleanMobile)
+            console.log('DEBUG: LoginPage calling sendOTP with:', cleanMobile)
+            const result = await sendOTP(cleanMobile)
+            console.log('DEBUG: sendOTP result:', result)
             toast.success('OTP sent successfully!')
             navigate('/verify-otp', { state: { mobile: cleanMobile } })
         } catch (err: unknown) {
+            console.error('DEBUG: sendOTP error:', err)
             const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
             setError(msg || 'Failed to send OTP. Please try again.')
         } finally {

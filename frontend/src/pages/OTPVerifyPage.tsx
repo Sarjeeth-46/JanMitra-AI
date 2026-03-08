@@ -10,6 +10,7 @@ export default function OTPVerifyPage() {
     const location = useLocation()
     const { login } = useAuth()
     const mobile = location.state?.mobile || ''
+    const name = location.state?.name || ''
 
     const [otp, setOtp] = useState('')
     const [loading, setLoading] = useState(false)
@@ -37,7 +38,7 @@ export default function OTPVerifyPage() {
         setLoading(true)
         setError('')
         try {
-            const res = await verifyOTP(mobile, otp)
+            const res = await verifyOTP(mobile, otp, name)
             login(res.user, res.access_token)
             toast.success('Successfully authenticated!')
             navigate('/profile')
@@ -90,6 +91,9 @@ export default function OTPVerifyPage() {
                             className="block w-full text-center py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none text-3xl font-bold tracking-[0.5em] placeholder:text-gray-200"
                             required
                         />
+                        <p className="text-[10px] text-center text-blue-500 mt-2 font-semibold uppercase tracking-wider">
+                            Demo Mode: Use code 123456 if SMS not received
+                        </p>
                     </div>
 
                     <button

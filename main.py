@@ -47,6 +47,11 @@ async def lifespan(app: FastAPI):
         }
     )
     
+    print("\n" + "#"*60)
+    print("!!! JANMITRA AI BACKEND: READY & LOGGING ALL REQUESTS !!!")
+    print("#"*60 + "\n")
+    import sys
+    sys.stdout.flush()
     yield
     
     logger.info(
@@ -76,11 +81,21 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "https://janmitra-ai.vercel.app"],
+    allow_origins=["*"],  # Temporarily allow all for debugging
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Global Request Logger
+@app.middleware("http")
+async def debug_request_logger(request: Request, call_next):
+    """Logs the path of every incoming request to help debug connectivity."""
+    print(f"\n>>> INCOMING REQUEST: {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}")
+    import sys
+    sys.stdout.flush()
+    logger.info(f"DEBUG: Request to {request.method} {request.url.path}")
+    return await call_next(request)
 
 # Middleware to handle malformed JSON
 @app.middleware("http")
@@ -242,6 +257,7 @@ app.include_router(health.router)
 app.include_router(evaluation.router)
 app.include_router(voice.router)
 app.include_router(document.router)
+app.include_router(auth.router)  # Add auth here too for proxy compatibility
 
 if __name__ == "__main__":
     import uvicorn
