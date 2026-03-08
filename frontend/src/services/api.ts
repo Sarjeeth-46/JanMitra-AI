@@ -14,8 +14,10 @@ import API_BASE_URL, { apiEndpoints } from '../config/api'
 export const API_BASE = API_BASE_URL
 console.log('DEBUG: API_BASE initialized as:', API_BASE || '(relative)')
 
+import { generateUUID } from '../utils/uuid'
+
 // Stable session ID for the lifetime of this browser tab (voice concurrency control)
-export const SESSION_ID = crypto.randomUUID()
+export const SESSION_ID = generateUUID()
 
 // Plain axios instance for public endpoints (login/register) – no auth interceptor
 const publicAxios = axios.create({

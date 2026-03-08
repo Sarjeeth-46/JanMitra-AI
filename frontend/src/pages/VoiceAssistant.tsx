@@ -14,8 +14,10 @@ interface Message {
 // Four mutually-exclusive UI states for the voice pipeline
 type VoiceState = 'idle' | 'recording' | 'processing' | 'speaking'
 
+import { generateUUID } from '../utils/uuid'
+
 // Persistent session ID so the backend can cancel stale requests
-const SESSION_ID = crypto.randomUUID()
+const SESSION_ID = generateUUID()
 
 // AbortController ref — replaced on every new request so the previous fetch is cancelled
 let _abortController: AbortController | null = null
