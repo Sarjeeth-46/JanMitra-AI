@@ -43,3 +43,8 @@ valid_test.wav
 # OS
 .DS_Store
 Thumbs.db
+.env
+__pycache__/
+*.pyc
+node_modules/
+dist/
