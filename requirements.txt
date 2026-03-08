@@ -1,0 +1,30 @@
+# FastAPI and server
+fastapi
+uvicorn[standard]
+
+# AWS SDK
+boto3
+
+# Data validation
+pydantic
+pydantic-settings
+
+# Testing
+pytest
+pytest-asyncio
+hypothesis
+
+# Additional utilities
+python-dotenv
+python-json-logger
+
+# File upload support
+python-multipart
+
+# Document parsing (PDF text extraction)
+pdfminer.six
+
+# Security and Authentication
+passlib[bcrypt]
+python-jose[cryptography]
+slowapi

@@ -1,0 +1,25 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-8.0.0, pluggy-1.6.0 -- C:\Users\Sarjeeth S\AppData\Local\Programs\Python\Python310\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: D:\project\Janmitra AI
+plugins: anyio-4.12.1, hypothesis-6.151.9, asyncio-0.23.5
+asyncio: mode=strict
+collecting ... collected 4 items
+
+tests/system_test.py::test_invalid_dob_rejected PASSED                   [ 25%]
+tests/system_test.py::test_income_validation_works PASSED                [ 50%]
+tests/system_test.py::test_scheme_results_returned PASSED                [ 75%]
+tests/system_test.py::test_login_successful PASSED                       [100%]
+
+============================== warnings summary ===============================
+models\config.py:10
+  D:\project\Janmitra AI\models\config.py:10: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+models\user_profile.py:17
+  D:\project\Janmitra AI\models\user_profile.py:17: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator("age")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 4 passed, 2 warnings in 4.40s ========================

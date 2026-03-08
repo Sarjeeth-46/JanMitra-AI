@@ -1,0 +1,108 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-8.0.0, pluggy-1.6.0 -- C:\Users\Sarjeeth S\AppData\Local\Programs\Python\Python310\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: D:\project\Janmitra AI
+plugins: anyio-4.12.1, hypothesis-6.151.9, asyncio-0.23.5
+asyncio: mode=strict
+collecting ... collected 4 items
+
+tests/system_test.py::test_invalid_dob_rejected FAILED                   [ 25%]
+tests/system_test.py::test_income_validation_works FAILED                [ 50%]
+tests/system_test.py::test_scheme_results_returned FAILED                [ 75%]
+tests/system_test.py::test_login_successful PASSED                       [100%]
+
+================================== FAILURES ===================================
+__________________________ test_invalid_dob_rejected __________________________
+
+    @pytest.mark.asyncio
+    async def test_invalid_dob_rejected():
+        """Test that forms with invalid DOBs format or out-of-bounds age are rejected via backend API or Pydantic validation."""
+        async with AsyncClient(app=app, base_url="http://test") as client:
+            # Pydantic validation on Evaluate route handles this implicitly although
+            # our main front-end Zod handles most user-facing errors.
+            # Let's test negative age
+            response = await client.post("/api/evaluate", json={
+                "name": "Test User",
+                "age": -5,
+                "income": 100000,
+                "state": "Delhi",
+                "occupation": "farmer",
+                "category": "General",
+                "land_size": 2.0
+            })
+>           assert response.status_code == 400 or response.status_code == 422 # Dependent on ValidationError handler
+E           assert (403 == 400 or 403 == 422)
+E            +  where 403 = <Response [403 Forbidden]>.status_code
+E            +  and   403 = <Response [403 Forbidden]>.status_code
+
+tests\system_test.py:23: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"timestamp": 1772964865.985436, "level": "INFO", "logger": "httpx", "module": "_client", "function": "_send_single_request", "line": 1758, "message": "HTTP Request: POST http://test/api/evaluate \"HTTP/1.1 403 Forbidden\""}
+------------------------------ Captured log call ------------------------------
+INFO     httpx:_client.py:1758 HTTP Request: POST http://test/api/evaluate "HTTP/1.1 403 Forbidden"
+________________________ test_income_validation_works _________________________
+
+    @pytest.mark.asyncio
+    async def test_income_validation_works():
+        """Test that extremely large incomes are rejected."""
+        async with AsyncClient(app=app, base_url="http://test") as client:
+            response = await client.post("/api/evaluate", json={
+                "name": "Test User",
+                "age": 30,
+                "income": -1000,
+                "state": "Delhi",
+                "occupation": "farmer",
+                "category": "General",
+                "land_size": 2.0
+            })
+>           assert response.status_code == 400 or response.status_code == 422
+E           assert (403 == 400 or 403 == 422)
+E            +  where 403 = <Response [403 Forbidden]>.status_code
+E            +  and   403 = <Response [403 Forbidden]>.status_code
+
+tests\system_test.py:38: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"timestamp": 1772964866.196409, "level": "INFO", "logger": "httpx", "module": "_client", "function": "_send_single_request", "line": 1758, "message": "HTTP Request: POST http://test/api/evaluate \"HTTP/1.1 403 Forbidden\""}
+------------------------------ Captured log call ------------------------------
+INFO     httpx:_client.py:1758 HTTP Request: POST http://test/api/evaluate "HTTP/1.1 403 Forbidden"
+________________________ test_scheme_results_returned _________________________
+
+    @pytest.mark.asyncio
+    async def test_scheme_results_returned():
+        """Test that eligible scheme results are returned rapidly."""
+        start_time = time.time()
+        async with AsyncClient(app=app, base_url="http://test") as client:
+            response = await client.post("/api/evaluate", json={
+                "name": "Test Farmer",
+                "age": 35,
+                "income": 50000,
+                "state": "Uttar Pradesh",
+                "occupation": "farmer",
+                "category": "General",
+                "land_size": 1.5
+            })
+>           assert response.status_code == 200
+E           assert 403 == 200
+E            +  where 403 = <Response [403 Forbidden]>.status_code
+
+tests\system_test.py:55: AssertionError
+---------------------------- Captured stdout call -----------------------------
+{"timestamp": 1772964866.2144787, "level": "INFO", "logger": "httpx", "module": "_client", "function": "_send_single_request", "line": 1758, "message": "HTTP Request: POST http://test/api/evaluate \"HTTP/1.1 403 Forbidden\""}
+------------------------------ Captured log call ------------------------------
+INFO     httpx:_client.py:1758 HTTP Request: POST http://test/api/evaluate "HTTP/1.1 403 Forbidden"
+============================== warnings summary ===============================
+models\config.py:10
+  D:\project\Janmitra AI\models\config.py:10: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+models\user_profile.py:17
+  D:\project\Janmitra AI\models\user_profile.py:17: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator("age")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/system_test.py::test_invalid_dob_rejected - assert (403 == 400 o...
+FAILED tests/system_test.py::test_income_validation_works - assert (403 == 40...
+FAILED tests/system_test.py::test_scheme_results_returned - assert 403 == 200
+=================== 3 failed, 1 passed, 2 warnings in 3.02s ===================
