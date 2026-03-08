@@ -10,7 +10,8 @@
 import axios, { type AxiosInstance } from 'axios'
 
 // ─── Base URL ────────────────────────────────────────────────────────────────
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+import API_BASE_URL, { apiEndpoints } from '../config/api'
+export const API_BASE = API_BASE_URL
 console.log('DEBUG: API_BASE initialized as:', API_BASE || '(relative)')
 
 // Stable session ID for the lifetime of this browser tab (voice concurrency control)
@@ -40,7 +41,7 @@ async function getToken(): Promise<string> {
   // Only fetch once even if called concurrently
   if (!_tokenPromise) {
     _tokenPromise = axios
-      .get<{ access_token: string }>(`${API_BASE}/api/auth/anonymous-token`)
+      .get<{ access_token: string }>(apiEndpoints.anonymous_token)
       .then(res => {
         localStorage.setItem('access_token', res.data.access_token)
         _tokenPromise = null

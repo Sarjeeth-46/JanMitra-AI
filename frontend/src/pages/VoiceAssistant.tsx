@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Mic, Square, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import API_BASE_URL, { apiEndpoints } from '../config/api'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 interface Message {
@@ -154,12 +155,11 @@ export default function VoiceAssistant() {
             const formData = new FormData()
             formData.append('audio', blob, 'voice.webm')
 
-            // ── Token (bypass Vite proxy — it strips /api which breaks auth endpoints) ──
-            const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+            // ── Token (centralized API configuration) ──
             let token = localStorage.getItem('access_token') || ''
             if (!token) {
                 try {
-                    const tr = await fetch(`${API}/api/auth/anonymous-token`)
+                    const tr = await fetch(apiEndpoints.anonymous_token)
                     if (tr.ok) {
                         const td = await tr.json()
                         token = td.access_token || ''
@@ -169,7 +169,7 @@ export default function VoiceAssistant() {
             }
 
             const res = await fetch(
-                `${API}/api/voice/query?lang=${encodeURIComponent(langParam)}`,
+                `${apiEndpoints.voice_query}?lang=${encodeURIComponent(langParam)}`,
                 {
                     method: 'POST',
                     headers: {
